@@ -90,17 +90,24 @@ const Index = () => {
 
         // Lê resposta do N8N (Response to Webhook)
         const data = await response.json().catch(() => null);
-        if (data && (data.message || data.text)) {
-          const text = data.message ?? data.text;
-          const ts = data.timestamp ?? Date.now().toString();
-          const newMessage: MessageType = {
-            id: ts,
-            text,
-            sent: false,
-            timestamp: new Date(),
-            status: 'delivered'
-          };
-          setMessages(prev => [...prev, newMessage]);
+        console.log('Resposta do N8N:', data);
+        
+        if (data) {
+          // N8N pode retornar array ou objeto
+          const responseData = Array.isArray(data) ? data[0] : data;
+          
+          if (responseData && (responseData.message || responseData.text)) {
+            const text = responseData.message ?? responseData.text;
+            const ts = responseData.timestamp ?? Date.now().toString();
+            const newMessage: MessageType = {
+              id: ts,
+              text,
+              sent: false,
+              timestamp: new Date(),
+              status: 'delivered'
+            };
+            setMessages(prev => [...prev, newMessage]);
+          }
         }
       } else {
         // Marca como enviada, porém sem confirmação de entrega
