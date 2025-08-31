@@ -11,22 +11,16 @@ const Index = () => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState('');
-  const [responseUrl, setResponseUrl] = useState('');
+  
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
 
   // Carregar configurações salvas
   useEffect(() => {
     const savedWebhookUrl = localStorage.getItem('webhookUrl');
-    const savedResponseUrl = localStorage.getItem('responseUrl');
     if (savedWebhookUrl) {
       setWebhookUrl(savedWebhookUrl);
-    }
-    if (savedResponseUrl) {
-      setResponseUrl(savedResponseUrl);
-    }
-    
-    if (!savedWebhookUrl) {
+    } else {
       // Se não há webhook configurado, abrir modal automaticamente
       setIsConfigModalOpen(true);
     }
@@ -42,50 +36,11 @@ const Index = () => {
     setMessages([welcomeMessage]);
   }, []);
 
-  const handleSaveWebhook = (url: string, responseUrl: string) => {
+  const handleSaveWebhook = (url: string) => {
     setWebhookUrl(url);
-    setResponseUrl(responseUrl);
     localStorage.setItem('webhookUrl', url);
-    localStorage.setItem('responseUrl', responseUrl);
   };
 
-  // Polling para verificar novas mensagens
-  useEffect(() => {
-    if (!responseUrl) return;
-
-    const pollForMessages = async () => {
-      try {
-        const response = await fetch(responseUrl, {
-          method: 'GET',
-          mode: 'cors'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.message && data.timestamp) {
-            const newMessage: MessageType = {
-              id: data.timestamp,
-              text: data.message,
-              sent: false,
-              timestamp: new Date(data.timestamp),
-              status: 'delivered'
-            };
-            
-            setMessages(prev => {
-              // Evitar mensagens duplicadas
-              if (prev.find(msg => msg.id === newMessage.id)) return prev;
-              return [...prev, newMessage];
-            });
-          }
-        }
-      } catch (error) {
-        console.log('Erro ao verificar mensagens:', error);
-      }
-    };
-
-    const interval = setInterval(pollForMessages, 2000); // Verifica a cada 2 segundos
-    return () => clearInterval(interval);
-  }, [responseUrl]);
 
   const sendMessage = async (messageText: string) => {
     if (!webhookUrl) {
@@ -111,40 +66,63 @@ const Index = () => {
     setIsSending(true);
 
     try {
-      console.log('Enviando mensagem para webhook:', webhookUrl);
-      
-      const params = new URLSearchParams({
+      console.log('Enviando mensagem (POST) para webhook:', webhookUrl);
+
+      const payload = {
         message: messageText,
         timestamp: new Date().toISOString(),
         sender: 'user',
         chat_id: 'whatsapp_chat'
-      });
-      
-      const response = await fetch(`${webhookUrl}?${params.toString()}`, {
-        method: 'GET',
-        mode: 'no-cors'
+      };
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
 
-      // Atualizar status da mensagem para enviada
-      setMessages(prev => prev.map(msg => 
-        msg.id === sentMessage.id 
-          ? { ...msg, status: 'delivered' }
-          : msg
-      ));
+      if (response.ok) {
+        // Atualiza status da mensagem enviada
+        setMessages(prev => prev.map(msg =>
+          msg.id === sentMessage.id ? { ...msg, status: 'delivered' } : msg
+        ));
+
+        // Lê resposta do N8N (Response to Webhook)
+        const data = await response.json().catch(() => null);
+        if (data && (data.message || data.text)) {
+          const text = data.message ?? data.text;
+          const ts = data.timestamp ?? Date.now().toString();
+          const newMessage: MessageType = {
+            id: ts,
+            text,
+            sent: false,
+            timestamp: new Date(),
+            status: 'delivered'
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
+      } else {
+        // Marca como enviada, porém sem confirmação de entrega
+        setMessages(prev => prev.map(msg =>
+          msg.id === sentMessage.id ? { ...msg, status: 'sent' } : msg
+        ));
+        toast({
+          title: 'Falha ao receber resposta',
+          description: 'Webhook retornou status ' + response.status + '.',
+          variant: 'destructive'
+        });
+      }
 
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
-      
-      // Atualizar status para erro
-      setMessages(prev => prev.map(msg => 
-        msg.id === sentMessage.id 
-          ? { ...msg, status: 'sent' }
-          : msg
+      setMessages(prev => prev.map(msg =>
+        msg.id === sentMessage.id ? { ...msg, status: 'sent' } : msg
       ));
-
       toast({
-        title: "Mensagem Enviada",
-        description: "A mensagem foi enviada para o N8N. Aguarde a resposta.",
+        title: 'Erro ao enviar',
+        description: 'Verifique a URL do webhook e as permissões de CORS no N8N.',
+        variant: 'destructive',
       });
     } finally {
       setIsSending(false);
@@ -169,7 +147,6 @@ const Index = () => {
         isOpen={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
         webhookUrl={webhookUrl}
-        responseUrl={responseUrl}
         onSaveWebhook={handleSaveWebhook}
       />
     </div>
