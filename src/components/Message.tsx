@@ -25,13 +25,13 @@ const Message = ({ message }: MessageProps) => {
   const getStatusIcon = () => {
     switch (message.status) {
       case 'sending':
-        return <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />;
+        return <div className="w-3 h-3 border border-muted-foreground border-t-transparent rounded-full animate-spin" />;
       case 'sent':
-        return <Check size={16} className="text-gray-400" />;
+        return <Check size={16} className="text-muted-foreground" />;
       case 'delivered':
-        return <CheckCheck size={16} className="text-gray-400" />;
+        return <CheckCheck size={16} className="text-muted-foreground" />;
       case 'read':
-        return <CheckCheck size={16} className="text-blue-500" />;
+        return <CheckCheck size={16} className="text-blue-400" />;
       default:
         return null;
     }
@@ -42,7 +42,7 @@ const Message = ({ message }: MessageProps) => {
       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
         message.sent 
           ? 'bg-message-sent text-white rounded-br-md' 
-          : 'bg-message-received text-gray-800 rounded-bl-md border'
+          : 'bg-message-received text-foreground rounded-bl-md border border-border'
       }`}>
         <p className="text-sm leading-relaxed">{message.text}</p>
         <div className={`flex items-center justify-end mt-1 space-x-1 ${

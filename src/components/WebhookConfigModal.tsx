@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Settings, ExternalLink, Save } from 'lucide-react';
 
@@ -11,11 +12,13 @@ interface WebhookConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
   webhookUrl: string;
-  onSaveWebhook: (url: string) => void;
+  httpMethod: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  onSaveWebhook: (url: string, method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE') => void;
 }
 
-const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, onSaveWebhook }: WebhookConfigModalProps) => {
+const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, httpMethod, onSaveWebhook }: WebhookConfigModalProps) => {
   const [url, setUrl] = useState(webhookUrl);
+  const [method, setMethod] = useState<typeof httpMethod>(httpMethod);
   const [isValidating, setIsValidating] = useState(false);
   const { toast } = useToast();
 
@@ -31,11 +34,11 @@ const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, onSaveWebhook }: Webh
 
     try {
       new URL(url); // Valida se é uma URL válida
-      onSaveWebhook(url);
+      onSaveWebhook(url, method);
       onClose();
       toast({
         title: 'Configuração Salva',
-        description: 'Webhook configurado com sucesso (POST + Response to Webhook)!',
+        description: `Webhook configurado com sucesso (${method} + Response to Webhook)!`,
       });
     } catch (error) {
       toast({
@@ -65,10 +68,10 @@ const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, onSaveWebhook }: Webh
       };
       
       const response = await fetch(url, {
-        method: 'POST',
+        method: method,
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: method !== 'GET' ? JSON.stringify(payload) : undefined
       });
 
       if (response.ok) {
@@ -103,34 +106,54 @@ const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, onSaveWebhook }: Webh
             <span>Configuração do Webhook N8N</span>
           </DialogTitle>
           <DialogDescription>
-            Use método POST e finalize com o nó Response to Webhook no N8N.
+            Selecione o método HTTP e configure o webhook no N8N com Response to Webhook.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="http-method">Método HTTP</Label>
+              <Select value={method} onValueChange={(value: typeof method) => setMethod(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o método" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-border">
+                  <SelectItem value="GET">GET</SelectItem>
+                  <SelectItem value="POST">POST</SelectItem>
+                  <SelectItem value="PUT">PUT</SelectItem>
+                  <SelectItem value="PATCH">PATCH</SelectItem>
+                  <SelectItem value="DELETE">DELETE</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="webhook-url">URL do Webhook</Label>
+              <Input
+                id="webhook-url"
+                placeholder="https://webhook.n8n.io/webhook/your-id"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="webhook-url">URL do Webhook (POST)</Label>
-            <Input
-              id="webhook-url"
-              placeholder="https://webhook.n8n.io/webhook/your-webhook-id"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500">
-              Enviaremos as mensagens via POST e leremos a resposta do próprio webhook.
+            <p className="text-xs text-muted-foreground">
+              Enviaremos as mensagens via {method} e leremos a resposta do próprio webhook.
             </p>
           </div>
           
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <p className="text-sm text-blue-800 mb-2">
-              <strong>Como configurar no N8N:</strong>
+          <div className="bg-muted/50 p-3 rounded-lg border">
+            <p className="text-sm font-medium mb-2">
+              Como configurar no N8N:
             </p>
-            <ol className="text-xs text-blue-700 space-y-1">
-              <li>1. Inicie com um nó Webhook (método POST).</li>
+            <ol className="text-xs text-muted-foreground space-y-1">
+              <li>1. Inicie com um nó Webhook (método {method}).</li>
               <li>2. Processe a mensagem conforme necessário.</li>
-              <li>3. Finalize com o nó "Response to Webhook" retornando JSON: {`{ message, timestamp }`}.</li>
-              <li>4. Habilite CORS no webhook (Access-Control-Allow-Origin).</li>
+              <li>3. Finalize com o nó "Response to Webhook" retornando JSON.</li>
+              <li>4. Habilite CORS no webhook se necessário.</li>
             </ol>
           </div>
         </div>

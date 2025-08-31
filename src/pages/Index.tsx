@@ -11,6 +11,7 @@ const Index = () => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState('');
+  const [httpMethod, setHttpMethod] = useState<'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'>('POST');
   
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
@@ -18,11 +19,17 @@ const Index = () => {
   // Carregar configurações salvas
   useEffect(() => {
     const savedWebhookUrl = localStorage.getItem('webhookUrl');
+    const savedHttpMethod = localStorage.getItem('httpMethod') as typeof httpMethod;
+    
     if (savedWebhookUrl) {
       setWebhookUrl(savedWebhookUrl);
     } else {
       // Se não há webhook configurado, abrir modal automaticamente
       setIsConfigModalOpen(true);
+    }
+    
+    if (savedHttpMethod) {
+      setHttpMethod(savedHttpMethod);
     }
 
     // Mensagem de boas-vindas
@@ -36,9 +43,11 @@ const Index = () => {
     setMessages([welcomeMessage]);
   }, []);
 
-  const handleSaveWebhook = (url: string) => {
+  const handleSaveWebhook = (url: string, method: typeof httpMethod) => {
     setWebhookUrl(url);
+    setHttpMethod(method);
     localStorage.setItem('webhookUrl', url);
+    localStorage.setItem('httpMethod', method);
   };
 
 
@@ -66,7 +75,7 @@ const Index = () => {
     setIsSending(true);
 
     try {
-      console.log('Enviando mensagem (POST) para webhook:', webhookUrl);
+      console.log(`Enviando mensagem (${httpMethod}) para webhook:`, webhookUrl);
 
       const payload = {
         message: messageText,
@@ -76,10 +85,10 @@ const Index = () => {
       };
 
       const response = await fetch(webhookUrl, {
-        method: 'POST',
+        method: httpMethod,
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: httpMethod !== 'GET' ? JSON.stringify(payload) : undefined
       });
 
       if (response.ok) {
@@ -137,7 +146,7 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background max-w-md mx-auto border-l border-r border-gray-200 shadow-xl">
+    <div className="h-screen flex flex-col bg-background max-w-md mx-auto border-l border-r border-border shadow-xl">
       <ChatHeader 
         onSettingsClick={() => setIsConfigModalOpen(true)}
         isOnline={!!webhookUrl}
@@ -154,6 +163,7 @@ const Index = () => {
         isOpen={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
         webhookUrl={webhookUrl}
+        httpMethod={httpMethod}
         onSaveWebhook={handleSaveWebhook}
       />
     </div>

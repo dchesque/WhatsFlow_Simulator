@@ -27,11 +27,11 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   };
 
   return (
-    <div className="bg-input-bg border-t px-4 py-3 flex items-center space-x-3">
+    <div className="bg-input-bg border-t border-border px-4 py-3 flex items-center space-x-3">
       <Button 
         variant="ghost" 
         size="sm"
-        className="text-gray-500 hover:text-gray-700 p-2"
+        className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2"
       >
         <Smile size={20} />
       </Button>
@@ -42,7 +42,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Digite uma mensagem..."
-          className="rounded-full border-gray-300 focus:border-primary pr-12"
+          className="rounded-full border-input focus:border-primary pr-12 bg-background"
           disabled={disabled}
         />
       </div>
@@ -50,7 +50,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
       <Button 
         onClick={handleSend}
         disabled={!message.trim() || disabled}
-        className="bg-primary hover:bg-primary/90 text-white rounded-full p-2 h-10 w-10"
+        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-2 h-10 w-10"
       >
         <Send size={18} />
       </Button>
