@@ -39,16 +39,16 @@ const Message = ({ message }: MessageProps) => {
 
   return (
     <div className={`flex mb-4 ${message.sent ? 'justify-end' : 'justify-start'} ${message.sent ? 'animate-slide-in-right' : 'animate-slide-in-left'}`}>
-      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-sm ${
+      <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md ${
         message.sent 
-          ? 'bg-message-sent text-white rounded-br-md' 
-          : 'bg-message-received text-foreground rounded-bl-md border border-border'
+          ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-md shadow-primary/20' 
+          : 'bg-message-received text-foreground rounded-bl-md border border-border/50 shadow-lg'
       }`}>
         <p className="text-sm leading-relaxed">{message.text}</p>
-        <div className={`flex items-center justify-end mt-1 space-x-1 ${
-          message.sent ? 'text-white/70' : 'text-message-timestamp'
+        <div className={`flex items-center justify-end mt-2 space-x-1 ${
+          message.sent ? 'text-primary-foreground/70' : 'text-message-timestamp'
         }`}>
-          <span className="text-xs">{formatTime(message.timestamp)}</span>
+          <span className="text-xs font-medium">{formatTime(message.timestamp)}</span>
           {message.sent && getStatusIcon()}
         </div>
       </div>

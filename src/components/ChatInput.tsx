@@ -27,11 +27,11 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
   };
 
   return (
-    <div className="bg-input-bg border-t border-border px-4 py-3 flex items-center space-x-3">
+    <div className="bg-input-bg border-t border-border px-4 py-3 flex items-center space-x-3 backdrop-blur-sm">
       <Button 
         variant="ghost" 
         size="sm"
-        className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2"
+        className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2 rounded-full transition-all duration-200"
       >
         <Smile size={20} />
       </Button>
@@ -42,7 +42,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Digite uma mensagem..."
-          className="rounded-full border-input focus:border-primary pr-12 bg-background"
+          className="rounded-full border-input focus:border-primary pr-12 bg-background shadow-sm transition-all duration-200 focus:shadow-md"
           disabled={disabled}
         />
       </div>
@@ -50,7 +50,7 @@ const ChatInput = ({ onSendMessage, disabled = false }: ChatInputProps) => {
       <Button 
         onClick={handleSend}
         disabled={!message.trim() || disabled}
-        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-2 h-10 w-10"
+        className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground rounded-full p-2 h-10 w-10 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:hover:scale-100"
       >
         <Send size={18} />
       </Button>

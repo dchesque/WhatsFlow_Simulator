@@ -118,12 +118,12 @@ const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, httpMethod, onSaveWeb
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o método" />
                 </SelectTrigger>
-                <SelectContent className="bg-background border-border">
-                  <SelectItem value="GET">GET</SelectItem>
-                  <SelectItem value="POST">POST</SelectItem>
-                  <SelectItem value="PUT">PUT</SelectItem>
-                  <SelectItem value="PATCH">PATCH</SelectItem>
-                  <SelectItem value="DELETE">DELETE</SelectItem>
+                <SelectContent className="bg-card border-border shadow-lg backdrop-blur-sm">
+                  <SelectItem value="GET" className="hover:bg-muted focus:bg-muted">GET</SelectItem>
+                  <SelectItem value="POST" className="hover:bg-muted focus:bg-muted">POST</SelectItem>
+                  <SelectItem value="PUT" className="hover:bg-muted focus:bg-muted">PUT</SelectItem>
+                  <SelectItem value="PATCH" className="hover:bg-muted focus:bg-muted">PATCH</SelectItem>
+                  <SelectItem value="DELETE" className="hover:bg-muted focus:bg-muted">DELETE</SelectItem>
                 </SelectContent>
               </Select>
             </div>

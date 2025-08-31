@@ -11,14 +11,14 @@ interface ChatHeaderProps {
 
 const ChatHeader = ({ onSettingsClick, contactName = "N8N Bot", isOnline = true }: ChatHeaderProps) => {
   return (
-    <div className="bg-chat-header text-white px-4 py-3 flex items-center justify-between shadow-md">
+    <div className="bg-chat-header border-b border-border px-4 py-3 flex items-center justify-between backdrop-blur-sm">
       <div className="flex items-center space-x-3">
         <div className="relative">
-          <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30">
-            <span className="text-primary-foreground font-semibold">N8</span>
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-lg">
+            <span className="text-primary-foreground font-bold text-sm">N8</span>
           </div>
           {isOnline && (
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-background"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-background shadow-sm"></div>
           )}
         </div>
         <div>
@@ -27,28 +27,28 @@ const ChatHeader = ({ onSettingsClick, contactName = "N8N Bot", isOnline = true 
         </div>
       </div>
       
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-1">
         <Button 
           variant="ghost" 
           size="sm"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2"
+          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2 rounded-full transition-all duration-200"
         >
-          <Video size={20} />
+          <Video size={18} />
         </Button>
         <Button 
           variant="ghost" 
           size="sm"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2"
+          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2 rounded-full transition-all duration-200"
         >
-          <Phone size={20} />
+          <Phone size={18} />
         </Button>
         <Button 
           variant="ghost" 
           size="sm"
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2"
+          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 p-2 rounded-full transition-all duration-200"
           onClick={onSettingsClick}
         >
-          <Settings size={20} />
+          <Settings size={18} />
         </Button>
       </div>
     </div>
