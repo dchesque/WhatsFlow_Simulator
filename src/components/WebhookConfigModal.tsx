@@ -58,17 +58,15 @@ const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, onSaveWebhook }: Webh
 
     setIsValidating(true);
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'no-cors',
-        body: JSON.stringify({
-          test: true,
-          message: 'Teste de conexão',
-          timestamp: new Date().toISOString()
-        })
+      const params = new URLSearchParams({
+        test: 'true',
+        message: 'Teste de conexão',
+        timestamp: new Date().toISOString()
+      });
+      
+      const response = await fetch(`${url}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors'
       });
 
       toast({
@@ -121,7 +119,7 @@ const WebhookConfigModal = ({ isOpen, onClose, webhookUrl, onSaveWebhook }: Webh
             <ol className="text-xs text-blue-700 space-y-1">
               <li>1. Crie um novo workflow no N8N</li>
               <li>2. Adicione um trigger "Webhook"</li>
-              <li>3. Configure o método como "POST"</li>
+              <li>3. Configure o método como "GET"</li>
               <li>4. Copie a URL gerada e cole acima</li>
             </ol>
           </div>

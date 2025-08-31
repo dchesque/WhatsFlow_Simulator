@@ -66,18 +66,16 @@ const Index = () => {
     try {
       console.log('Enviando mensagem para webhook:', webhookUrl);
       
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'no-cors',
-        body: JSON.stringify({
-          message: messageText,
-          timestamp: new Date().toISOString(),
-          sender: 'user',
-          chat_id: 'whatsapp_chat'
-        })
+      const params = new URLSearchParams({
+        message: messageText,
+        timestamp: new Date().toISOString(),
+        sender: 'user',
+        chat_id: 'whatsapp_chat'
+      });
+      
+      const response = await fetch(`${webhookUrl}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors'
       });
 
       // Atualizar status da mensagem para enviada
