@@ -1,15 +1,18 @@
 
 import React from 'react';
-import { Settings, Phone, Video, MoreVertical } from 'lucide-react';
+import { Settings, Phone, Video, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 interface ChatHeaderProps {
   onSettingsClick: () => void;
   contactName?: string;
   isOnline?: boolean;
+  isDarkMode: boolean;
+  onToggleTheme: () => void;
 }
 
-const ChatHeader = ({ onSettingsClick, contactName = "N8N Bot", isOnline = true }: ChatHeaderProps) => {
+const ChatHeader = ({ onSettingsClick, contactName = "N8N Bot", isOnline = true, isDarkMode, onToggleTheme }: ChatHeaderProps) => {
   return (
     <div className="bg-chat-header border-b border-border px-4 py-3 flex items-center justify-between backdrop-blur-sm">
       <div className="flex items-center space-x-3">
@@ -27,7 +30,18 @@ const ChatHeader = ({ onSettingsClick, contactName = "N8N Bot", isOnline = true 
         </div>
       </div>
       
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center space-x-3">
+        {/* Theme Toggle */}
+        <div className="flex items-center space-x-2 bg-muted/30 rounded-full px-3 py-1.5">
+          <Sun size={14} className={`transition-colors ${!isDarkMode ? 'text-primary' : 'text-muted-foreground'}`} />
+          <Switch 
+            checked={isDarkMode} 
+            onCheckedChange={onToggleTheme}
+            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted-foreground/30"
+          />
+          <Moon size={14} className={`transition-colors ${isDarkMode ? 'text-primary' : 'text-muted-foreground'}`} />
+        </div>
+        
         <Button 
           variant="ghost" 
           size="sm"

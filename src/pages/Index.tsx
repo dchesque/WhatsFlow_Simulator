@@ -12,6 +12,7 @@ const Index = () => {
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState('');
   const [httpMethod, setHttpMethod] = useState<'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'>('POST');
+  const [isDarkMode, setIsDarkMode] = useState(true);
   
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
@@ -20,6 +21,7 @@ const Index = () => {
   useEffect(() => {
     const savedWebhookUrl = localStorage.getItem('webhookUrl');
     const savedHttpMethod = localStorage.getItem('httpMethod') as typeof httpMethod;
+    const savedTheme = localStorage.getItem('theme');
     
     if (savedWebhookUrl) {
       setWebhookUrl(savedWebhookUrl);
@@ -31,6 +33,11 @@ const Index = () => {
     if (savedHttpMethod) {
       setHttpMethod(savedHttpMethod);
     }
+
+    // Apply saved theme or default to dark
+    const prefersDark = savedTheme === 'dark' || (!savedTheme && true);
+    setIsDarkMode(prefersDark);
+    document.documentElement.classList.toggle('dark', prefersDark);
 
     // Mensagem de boas-vindas
     const welcomeMessage: MessageType = {
@@ -48,6 +55,13 @@ const Index = () => {
     setHttpMethod(method);
     localStorage.setItem('webhookUrl', url);
     localStorage.setItem('httpMethod', method);
+  };
+
+  const toggleTheme = () => {
+    const newIsDarkMode = !isDarkMode;
+    setIsDarkMode(newIsDarkMode);
+    document.documentElement.classList.toggle('dark', newIsDarkMode);
+    localStorage.setItem('theme', newIsDarkMode ? 'dark' : 'light');
   };
 
 
@@ -150,6 +164,8 @@ const Index = () => {
       <ChatHeader 
         onSettingsClick={() => setIsConfigModalOpen(true)}
         isOnline={!!webhookUrl}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
       />
       
       <ChatArea messages={messages} />
