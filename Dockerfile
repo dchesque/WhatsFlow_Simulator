@@ -1,31 +1,32 @@
-# Build stage
-FROM node:18-alpine AS build
-
+# ---- build stage ----
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# copiar apenas os arquivos de dependência primeiro para aproveitar cache
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
+# copiar restante do código e gerar build
 COPY . .
-
-# Build the application
 RUN npm run build
 
-# Production stage
+# ---- runtime stage ----
 FROM nginx:alpine
 
-# Copy built application from build stage
+# rótulos (boa prática para versionamento e rastreabilidade)
+LABEL org.opencontainers.image.title="whatsflow-simulator" \
+      org.opencontainers.image.description="Simulador WhatsFlow - frontend em Vite" \
+      org.opencontainers.image.authors="dchesque" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.created="${BUILD_DATE:-unknown}" \
+      org.opencontainers.image.revision="${GIT_SHA:-unknown}"
+
+# copiar arquivos estáticos construídos
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
+# sobrescrever configuração do nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# healthcheck para garantir que o container esteja servindo
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD wget -qO- http://localhost/ || exit 1
